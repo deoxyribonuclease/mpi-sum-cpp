@@ -1,0 +1,74 @@
+#cloud-config
+
+manage_etc_hosts: true
+
+users:
+  - name: ubuntu
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - build-essential
+  - gcc
+  - g++
+  - make
+  - cmake
+
+  # OpenMP
+  - libomp-dev
+  
+  # MPI
+  - openmpi-bin
+  - openmpi-common
+  - libopenmpi-dev
+
+  # NFS components
+  - nfs-kernel-server
+  - nfs-common
+
+  - git
+  - htop
+
+write_files:
+  - path: /usr/local/bin/cluster-setup.sh
+    permissions: '0755'
+    owner: root:root
+    content: |
+      #!/bin/bash
+
+      HOSTNAME=$(hostname)
+
+      echo "Running cluster-setup for node: $HOSTNAME"
+
+      if [[ "$HOSTNAME" == *"manager"* ]]; then
+          echo "Detected MANAGER node"
+
+          mkdir -p /opt/mpi_shared
+          chown ubuntu:ubuntu /opt/mpi_shared
+
+          echo "/opt/mpi_shared 10.0.0.0/24(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
+          exportfs -a
+
+          systemctl enable nfs-kernel-server
+          systemctl restart nfs-kernel-server
+
+          echo "Manager is ready."
+
+      elif [[ "$HOSTNAME" == *"worker"* ]]; then
+          echo "Detected WORKER node"
+
+          mkdir -p /opt/mpi_shared
+
+          echo "10.0.0.1:/opt/mpi_shared /opt/mpi_shared nfs defaults 0 0" >> /etc/fstab
+          mount -a
+
+          echo "Worker is ready."
+      fi
+
+runcmd:
+  - bash /usr/local/bin/cluster-setup.sh
