@@ -16,15 +16,15 @@ int main(int argc, char** argv) {
     int name_len;
     MPI_Get_processor_name(hostname, &name_len);
 
-    size_t ARRAY_SIZE = (argc > 2) ? atoll(argv[2]) : 20; 
-    if (ARRAY_SIZE < 1) ARRAY_SIZE = 1;
+    size_t ARRAY_SIZE = (argc > 2) ? atoll(argv[2]) : 200; 
+    if (ARRAY_SIZE < 1) ARRAY_SIZE = 200;
 
     std::vector<long long> array;
     if (rank == 0) {
         array.resize(ARRAY_SIZE);
         for (size_t i = 0; i < ARRAY_SIZE; i++)
-            array[i] = rand() % 100 + 1;
-        // printf("Initial array:\n");
+            array[i] = i+1;
+      //  printf("Initial array:\n");
         // for (size_t i = 0; i < ARRAY_SIZE; i++)
         //     printf("%lld ", array[i]);
         // printf("\n\n");
@@ -63,12 +63,12 @@ int main(int argc, char** argv) {
 
         if (rank == 0) {
             for (size_t i = 0; i < pairs; i++)
-                array[i] = root_res[i];
-            if (len % 2 == 1)
-                array[pairs] = array[len - 1];
+            array[i] = root_res[i];
+           // if (len % 2 == 1)
+           // array[pairs] = array[len - 1];
             len = pairs + (len % 2);
         }
-
+        
         MPI_Bcast(&len, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
     }
 

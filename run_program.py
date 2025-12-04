@@ -28,7 +28,7 @@ def run_mpi_program(file_name, num_processes, threads_per_node, array_size):
     if num_processes != -1:
         mpi_command += f" -n {num_processes}"
     
-    # рівномірний розподіл задач між вузлами
+    # рівномірний розподіл задач між вузламин
     mpi_command += " --map-by node"
 
     mpi_command += f" /home/ubuntu/cloud/{file_name} {threads_per_node} {array_size}"

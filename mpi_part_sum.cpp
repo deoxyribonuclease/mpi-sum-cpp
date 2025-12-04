@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     if (world_rank == 0) {
         full_array.resize(array_size);
         for (size_t i = 0; i < array_size; i++)
-            full_array[i] = rand() % 100;
+            full_array[i] = i+1;
     }
 
     size_t base = array_size / world_size;
@@ -71,7 +71,6 @@ int main(int argc, char** argv) {
     printf("Node %s (rank %d) local sum = %lld, time = %.3f sec\n",
            hostname, world_rank, local_sum, node_elapsed.count());
 
-    // Глобальне сумування
     long long global_sum = 0;
     auto global_start_time = std::chrono::high_resolution_clock::now();
     MPI_Reduce(&local_sum, &global_sum, 1, MPI_LONG_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
